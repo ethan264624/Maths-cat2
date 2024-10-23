@@ -1,0 +1,108 @@
+import random
+round_number = 0 
+wins = 0 
+losses = 0 
+results = []  
+results_for_simulation = [] 
+
+def main_function():
+
+    options = input('\nEnter 1 to play the game, 2 to stimulate rounds (switch and stay), 3 to stimulate always switch, 4 to stimulate always stay, 5 to stimulate many doors or any other key to quit: ')
+
+    if options == "1" :
+        def function_1():
+            global round_number, wins, losses
+            contin = input('\nWould you like to continue? (Type yes to continue, or press Enter to quit) ')
+            if contin.lower() != 'yes':
+                def display_results():
+                    print("\nGame Summary:")
+                    print(f"Rounds Played: {round_number}") 
+                    print(f"Wins: {wins}")
+                    print(f"Losses: {losses}")
+                    percentagewin = (wins/(wins +losses)) * 100
+                    percentageloss = (losses/(wins + losses)) * 100
+                    print(f"Win %: {percentagewin:.2f}")
+                    print(f"Loss %: {percentageloss:.2f}")
+                    print("\nDetailed Results:")
+                    print(f"{'Round':<10}{'Your Choice':<15}{'Action':<10}{'Result':<15}")
+                    print("-" * 45)
+                    for result in results:
+                        print(f"{result[0]:<10}{result[1]:<15}{result[2]:<10}{result[3]:<15}")
+                    print("\nThanks for playing!")
+                display_results()
+                return
+
+            round_number += 1
+            hello = ['door 1', 'door 2', 'door 3'] 
+            prize = random.choice(hello)  
+            goat = random.choice([door for door in hello if door != prize])  
+
+            door = input('door 1 | door 2 | door 3? ') 
+            
+            if door == '0':  
+                display_results()
+                return
+            
+            if door not in hello:
+                print('Not a valid option!')
+                function_1()
+                return
+
+            print("Goat is behind:", goat)
+            
+            either = input('Switch doors or stay at this door? (Type "switch" or "stay"): ').lower()
+            
+            if either == "switch":
+                print('\nSwitching doors...')
+                newdoor = [d for d in hello if d != door and d != goat][0]
+                print('You have switched to', newdoor)
+                
+                if newdoor == prize:
+                    print('The prize was in this door! You WIN!')
+                    wins += 1
+                    results.append((round_number, newdoor, either, 'win'))
+                    function_1()
+                else:
+                    print('The goat was in this door, so you lose!')
+                    losses += 1
+                    results.append((round_number, newdoor, either, 'lose'))
+                    function_1()
+            elif either == "stay":
+                print('You decided to stay at the door')
+                if door == prize: 
+                    print('The prize was in this door! You WIN!')
+                    wins += 1
+                    results.append((round_number, door, either, 'win'))
+                    function_1()
+                else:
+                    print('The goat was in this door, so you lose!')
+                    losses += 1
+                    results.append((round_number, door, either, 'lose'))
+                    function_1()
+        
+        function_1()
+
+    if options == "2":
+        def function_2():
+            round_number = 0  
+            switch_wins = 0  
+            stay_wins = 0  
+
+            print('\nThe following rounds were simulated...')
+            print("")
+            print(f"{'Round':<10}{'Result':<10}{'Action':<10}") 
+            print("-" * 35)
+
+            with open('part2_random.txt', 'a') as file:
+                file.write('The following rounds were simulated...\n')
+                file.write(f"{'Round':<10}{'Result':<10}{'Action':<10}\n")
+                file.write("-" * 35 + "\n")
+                
+                results_for_simulation = []
+                for i in range(10000):
+                    round_number += 1
+                    hello = ['door 1', 'door 2', 'door 3'] 
+                    prize = random.choice(hello)
+                    door_stimulated = random.choice(hello) 
+                    goat = random.choice([door for door in hello if door != prize and door != door_stimulated]) 
+                    switchorstay2 = random.choice(['switch', 'stay']) 
