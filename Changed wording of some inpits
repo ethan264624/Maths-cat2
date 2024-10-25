@@ -1,0 +1,367 @@
+import random
+round_number = 0 
+wins = 0 
+losses = 0 
+results = []  
+results_for_simulation = [] 
+
+def main_function():
+
+    options = input('\nEnter 1 to play the game, 2 to stimulate rounds (switch and stay), 3 to stimulate always switch, 4 to stimulate always stay, 5 to stimulate many doors or any other key to quit: ')
+
+    if options == "1" :
+        def function_1():
+            global round_number, wins, losses
+            contin = input('\nWould you like to continue? (Type yes to continue, or press Enter to quit) ')
+            if contin.lower() != 'yes':
+                def display_results():
+                    print("\nGame Summary:")
+                    print(f"Rounds Played: {round_number}") 
+                    print(f"Wins: {wins}")
+                    print(f"Losses: {losses}")
+                    percentagewin = (wins/(wins +losses)) * 100
+                    percentageloss = (losses/(wins + losses)) * 100
+                    print(f"Win %: {percentagewin:.2f}")
+                    print(f"Loss %: {percentageloss:.2f}")
+                    print("\nDetailed Results:")
+                    print(f"{'Round':<10}{'Your Choice':<15}{'Action':<10}{'Result':<15}")
+                    print("-" * 45)
+                    for result in results:
+                        print(f"{result[0]:<10}{result[1]:<15}{result[2]:<10}{result[3]:<15}")
+                    print("\nThanks for playing!")
+                display_results()
+                return
+
+            round_number += 1
+            hello = ['door 1', 'door 2', 'door 3'] 
+            prize = random.choice(hello)  
+            goat = random.choice([door for door in hello if door != prize])  
+
+            door = input('door 1 | door 2 | door 3? ') 
+            
+            if door == '0':  
+                display_results()
+                return
+            
+            if door not in hello:
+                print('Not a valid option!')
+                function_1()
+                return
+
+            print("Goat is behind:", goat)
+            
+            either = input('Switch doors or stay at this door? (Type "switch" or "stay"): ').lower()
+            
+            if either == "switch":
+                print('\nSwitching doors...')
+                newdoor = [d for d in hello if d != door and d != goat][0]
+                print('You have switched to', newdoor)
+                
+                if newdoor == prize:
+                    print('The prize was in this door! You WIN!')
+                    wins += 1
+                    results.append((round_number, newdoor, either, 'win'))
+                    function_1()
+                else:
+                    print('The goat was in this door, so you lose!')
+                    losses += 1
+                    results.append((round_number, newdoor, either, 'lose'))
+                    function_1()
+            elif either == "stay":
+                print('You decided to stay at the door')
+                if door == prize: 
+                    print('The prize was in this door! You WIN!')
+                    wins += 1
+                    results.append((round_number, door, either, 'win'))
+                    function_1()
+                else:
+                    print('The goat was in this door, so you lose!')
+                    losses += 1
+                    results.append((round_number, door, either, 'lose'))
+                    function_1()
+        
+        function_1()
+
+    if options == "2":
+        def function_2():
+            round_number = 0  
+            switch_wins = 0  
+            stay_wins = 0  
+
+            print('\nThe following rounds were simulated...')
+            print("")
+            print(f"{'Round':<10}{'Result':<10}{'Action':<10}") 
+            print("-" * 35)
+
+            with open('part2_random.txt', 'a') as file:
+                file.write('The following rounds were simulated...\n')
+                file.write(f"{'Round':<10}{'Result':<10}{'Action':<10}\n")
+                file.write("-" * 35 + "\n")
+                
+                results_for_simulation = []
+                for i in range(10000):
+                    round_number += 1
+                    hello = ['door 1', 'door 2', 'door 3'] 
+                    prize = random.choice(hello)
+                    door_stimulated = random.choice(hello) 
+                    goat = random.choice([door for door in hello if door != prize and door != door_stimulated]) 
+                    switchorstay2 = random.choice(['switch', 'stay']) 
+
+                    if switchorstay2 == "switch":
+                        door_stimulated = [door for door in hello if door != door_stimulated and door != goat][0]
+                        actions = "switch"
+                        if door_stimulated == prize:
+                            result = "win"
+                            switch_wins += 1
+                        else:
+                            result = "loss"
+                    else:
+                        actions = "stay"
+                        if door_stimulated == prize:
+                            result = "win"
+                            stay_wins += 1
+                        else:
+                            result = "loss"
+                    
+                    results_for_simulation.append(result)
+
+                    if round_number <= 1000:
+                        file.write(f"{round_number:<10}{result:<10}{actions:<10}\n")
+
+                    if round_number <= 50:
+                        print(f"{round_number:<10}{result:<10}{actions:<10}")
+
+                    if round_number in [50, 100, 1000, 5000, 10000]:
+                        switch_rate = (switch_wins / round_number) * 100
+                        stay_rate = (stay_wins / round_number) * 100
+                        print(f"\n{round_number} rounds:")
+                        print(f"Win rate with switch: {switch_rate:.2f}%")
+                        print(f"Win rate with stay: {stay_rate:.2f}%")
+                       
+            print('The rest were simulated silently...')
+            print("Results for the first 1000 rounds were saved to the file part2_random.txt.")
+            open_file2 = input('\nWould you like to open file part2_random.txt? ')
+
+            if "yes" in open_file2.lower():
+                with open('part2_random.txt', 'r') as file:
+                    content = file.read()
+                    print(content)
+                main_function()
+            else:
+                main_function()
+
+        function_2()
+
+    if options == "3":
+        def function_3():
+            round_number = 0  
+            switch_wins = 0  
+            action = "switch"  
+
+            with open("part3_random.txt", "a") as file:
+                file.write('\nThe following rounds were simulated with always switch...\n')
+                file.write(f"{'Round':<10}{'Result':<10}{'Action':<10}\n")
+                file.write("-" * 35 + "\n")
+
+                print('\nThe following rounds were simulated...')
+                print(f"{'Round':<10}{'Result':<10}{'Action':<10}")
+                print("-" * 35)
+
+                results_for_simulation = []
+                for i in range(10000):
+                    round_number += 1
+                    hello = ['door 1', 'door 2', 'door 3']
+                    prize = random.choice(hello)
+                    door_stimulated = random.choice(hello)
+                    goat = random.choice([door for door in hello if door != prize and door != door_stimulated])
+
+                    door_stimulated = [door for door in hello if door != door_stimulated and door != goat][0]
+                    
+                    if door_stimulated == prize:
+                        result = "win"
+                        switch_wins += 1
+                    else:
+                        result = "loss"
+                    
+                    results_for_simulation.append(result)
+
+                    if round_number <= 1000:
+                        file.write(f"{round_number:<10}{result:<10}{action:<10}\n")
+
+                    if round_number <= 50:
+                        print(f"{round_number:<10}{result:<10}{action:<10}")
+
+                    if round_number in [50, 100, 1000, 5000, 10000]:
+                        switch_win_rate = (switch_wins / round_number) * 100
+                        print(f"\n{round_number} rounds:")
+                        print(f"Win rate with switch: {switch_win_rate:.2f}%")
+                       
+            print('The rest was simulated silently...')
+            print('Results for the first 1000 rounds were saved to file part3_random.txt.')
+            
+            open_file3 = input('\nWould you like to open file part3_random.txt? ')
+            
+            if "yes" in open_file3.lower():
+                with open('part3_random.txt', 'r') as file:
+                    content = file.read()
+                    print(content)
+                main_function()
+            else:
+                main_function()
+
+        function_3()
+
+    if options == "4":
+        def function_4():
+            round_number = 0
+            stay_wins = 0
+            action = "stay"  
+
+            with open("part4_random.txt", "a") as file:
+                file.write('\nThe following rounds were simulated with always stay...\n')
+                file.write(f"{'Round':<10}{'Result':<10}{'Action':<10}\n")
+                file.write("-" * 35 + "\n")
+
+                print('\nThe following rounds were simulated...')
+                print(f"{'Round':<10}{'Result':<10}{'Action':<10}")
+                print("-" * 35)
+                
+                results_for_simulation = []
+                for i in range(10000):
+                    round_number += 1
+                    hello = ['door 1', 'door 2', 'door 3']
+                    prize = random.choice(hello)
+                    door_stimulated = random.choice(hello)
+
+                    if door_stimulated == prize:
+                        result = "win"
+                        stay_wins += 1
+                    else:
+                        result = "loss"
+                    
+                    results_for_simulation.append(result)
+
+                    if round_number <= 1000:
+                        file.write(f"{round_number:<10}{result:<10}{action:<10}\n")
+
+                    if round_number <= 50:
+                        print(f"{round_number:<10}{result:<10}{action:<10}")
+
+                    if round_number in [50, 100, 1000, 5000, 10000]:
+                        stay_win_rate = (stay_wins / round_number) * 100
+                        print(f"\n{round_number} rounds:")
+                        print(f"Win rate with stay: {stay_win_rate:.2f}%")
+                       
+            print('The rest was simulated silently...')
+            print('Results for the first 1000 rounds were saved to file part4_random.txt.')
+            
+            open_file4 = input('\nWould you like to open file part4_random.txt? ')
+            
+            if "yes" in open_file4.lower():
+                with open('part4_random.txt', 'r') as file:
+                    content = file.read()
+                    print(content)
+                main_function()
+            else:
+                main_function()
+        function_4()
+
+
+
+
+    
+    if options == "5":
+        def function_5():
+            def run_simulation(rounds):
+                wins = 0 
+                for _ in range(rounds):
+                    doors = ['door {}'.format(i) for i in range(1, 11)]  
+                    prize = random.choice(doors)  
+                    initial_choice = random.choice(doors)  
+
+                    
+                    remaining_doors = [door for door in doors if door != initial_choice and door != prize]
+                    doors_to_remove = random.sample(remaining_doors, 8)
+                    
+                    
+                    remaining_door = [door for door in doors if door not in doors_to_remove and door != initial_choice][0]
+
+                    switched_choice = remaining_door
+
+                    if switched_choice == prize:
+                        wins += 1  
+
+                return wins, rounds - wins  
+
+            
+            for rounds in [50, 100, 500, 1000, 5000, 10000]:
+                wins, losses = run_simulation(rounds)
+
+                
+                if rounds == 50:
+                    print("\nResults for 50 rounds:")
+                    print(f"Total Wins: {wins}")
+                    print(f"Total Losses: {losses}")
+                    win_percentage = (wins / rounds) * 100
+                    loss_percentage = (losses / rounds) * 100
+                    print(f"Win Percentage: {win_percentage:.2f}%")
+                    print(f"Loss Percentage: {loss_percentage:.2f}%")
+
+                if rounds == 100:
+                    print("\nResults for 100 rounds:")
+                    print(f"Total Wins: {wins}")
+                    print(f"Total Losses: {losses}")
+                    win_percentage = (wins / rounds) * 100
+                    loss_percentage = (losses / rounds) * 100
+                    print(f"Win Percentage: {win_percentage:.2f}%")
+                    print(f"Loss Percentage: {loss_percentage:.2f}%")
+
+                if rounds == 5000:
+                    print("\nResults for 5000 rounds:")
+                    print(f"Total Wins: {wins}")
+                    print(f"Total Losses: {losses}")
+                    win_percentage = (wins / rounds) * 100
+                    loss_percentage = (losses / rounds) * 100
+                    print(f"Win Percentage: {win_percentage:.2f}%")
+                    print(f"Loss Percentage: {loss_percentage:.2f}%")
+                
+                if rounds == 10000:
+                    print("\nResults for 10000 rounds:")
+                    print(f"Total Wins: {wins}")
+                    print(f"Total Losses: {losses}")
+                    win_percentage = (wins / rounds) * 100
+                    loss_percentage = (losses / rounds) * 100
+                    print(f"Win Percentage: {win_percentage:.2f}%")
+                    print(f"Loss Percentage: {loss_percentage:.2f}%")
+
+                
+                if rounds == 1000:
+                    with open("part5_random.txt", "w") as file:
+                        file.write(f"Results for 1000 rounds:\n")
+                        file.write(f"Total Wins: {wins}\n")
+                        file.write(f"Total Losses: {losses}\n")
+                        win_percentage = (wins / rounds) * 100
+                        file.write(f"Win Percentage: {win_percentage:.2f}%\n")
+                        file.write(f"Loss Percentage: {loss_percentage:.2f}%\n")
+                
+           
+            print("\nSimulations for 100, 500, 1000, 5000, and 10000 rounds were completed silently.")
+            file5 = input('Results for 1000 rounds were saved to part5_random.txt (would you like to open?)  ')
+            if "yes" in file5 or "Yes" in file5 : 
+                with open('part5_random.txt', 'r') as file : 
+                        content5 = file.read() 
+                        print(content5) 
+                        main_function()
+            else :
+                main_function()
+
+        
+        function_5()
+
+    else :          
+        exit()   
+        
+
+#!!
+main_function() #dont remove this because this what makes the entire code run
+#!!
